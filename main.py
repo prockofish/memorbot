@@ -123,11 +123,7 @@ async def person_dict_handler(message) -> None:
 
 @disp.message(lambda m: m.text == "Настройки")
 async def settings_handler(message) -> None:
-    await message.answer( "Выберите принцип обучения:\n\n" \
-            "1) Случайность - при обучении будут предлогаться слова в случайном порядке\n\n" \
-            "2) По забываемости - будут предлогаться слова с наихудшим качеством запоминания\n\n" \
-            "3) По времени - будут предлогаться слова, которые были последние в обучении\n\n" \
-            "4) По забываемости и времени - объединение 2 и 3 техники", reply_markup=inline.params )
+    await message.answer("Выберите необходимое действие:", reply_markup=inline.settings)
 
 @disp.message(lambda m: m.text == "Помощь")
 async def help_handler(message) -> None:
@@ -168,7 +164,7 @@ async def callback_param_handler(call) -> None:
         await call.message.delete()
         await call.message.answer("Регистрация окончена!")
         await call.message.answer("Все функции находяться в меню над клавиатурой", reply_markup=reply.main)
-    elif STEP_REG > 4:
+    elif STEP_REG >= 4:
         users_db.enter(call.message.chat.id, "param", call.data)
         await call.message.delete()
         await call.message.answer('Параметр обновлён')
@@ -237,7 +233,8 @@ async def callback_view_handler(call) -> None:  #view-page:page
             if len(inButtons) >= LINE_IN_PAGE and len(inButtons) + 1 != len(dicts):
                 inButtons[-1] += [InButton(text='--->', callback_data=f'view-page:{page + LINE_IN_PAGE}')]
             keyboard = InMarkup(inline_keyboard=inButtons, resize_keyboard=True)
-        await call.message.edit_text("Вот ваши словари:" if STEP_REG == 5 and dicts != [] else "У вас нет словарей", reply_markup=keyboard if STEP_REG == 5 and dicts != [] else None)
+        await call.message.delete()
+        await call.message.answer("Вот ваши словари:" if STEP_REG == 5 and dicts != [] else "У вас нет словарей", reply_markup=keyboard if STEP_REG == 5 and dicts != [] else None)
     else:
         await call.message.answer("Вы не зарегистрированы")
 
@@ -304,7 +301,24 @@ async def callback_education_handler(call, state) -> None:  #delete:dict_id:page
 
 @disp.callback_query(lambda c: c.data == 'help')
 async def callback_help_handler(call) -> None:
-    await call.message.edit_text("Реализация помощи")
+    await call.message.delete()
+    await call.message.answer("Реализация помощи")
+
+@disp.callback_query(lambda c: c.data == 're_param')
+async def callback_re_param_handler(call) -> None:
+    await call.message.delete()
+    await call.message.answer("Выберите принцип обучения:\n\n" \
+            "1) Случайность - при обучении будут предлогаться слова в случайном порядке\n\n" \
+            "2) По забываемости - будут предлогаться слова с наихудшим качеством запоминания\n\n" \
+            "3) По времени - будут предлогаться слова, которые были последние в обучении\n\n" \
+            "4) По забываемости и времени - объединение 2 и 3 техники", reply_markup=inline.params)
+    
+@disp.callback_query(lambda c: c.data == 'logout')
+async def callback_re_param_handler(call) -> None:
+    users_db.remove(call.message.chat.id)
+    await call.message.delete()
+    await call.message.answer("Все ваши данные успешно удалены.\nВы всегда можете восстановить работу бота при помощи команды /start")
+    
 #
 # Обработка state-ов
 #

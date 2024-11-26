@@ -22,6 +22,12 @@ class inline:
         [InButton( text="Помощь", callback_data="help" )]
     ], resize_keyboard=True )
 
+    settings = InMarkup( inline_keyboard=[
+        [InButton( text="Изменить метод обучения", callback_data="re_param" )],
+        [InButton( text="Помощь", callback_data="help" )],
+        [InButton( text="Удалить данные из бота", callback_data="logout" )]
+    ], resize_keyboard=True )
+
 class reply:
     main = ReMarkup( keyboard=[
         [ReButton( text="Начать обучение" )],
