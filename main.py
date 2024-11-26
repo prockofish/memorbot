@@ -72,6 +72,11 @@ def update_dicts(selected_dict, dicts, delete_flag=False):
                     result += [one_dict]
     return result
 
+def compare_data(word1, word2):
+    if word1.lower().replace(' ', '') == word2.lower().replace(' ', ''):
+        return True
+    return False
+
 #
 # text
 #
@@ -112,7 +117,7 @@ async def person_dict_handler(message) -> None:
             if len(inButtons) >= LINE_IN_PAGE and len(inButtons) != len(dicts):
                 inButtons += [[InButton( text='--->', callback_data=f'view-page:{LINE_IN_PAGE}')]]
             keyboard = InMarkup(inline_keyboard=inButtons, resize_keyboard=True)
-        await message.answer("Вот ваши словари:" if STEP_REG == 5 and dicts != [] else "У вас нет словарей", reply_markup=keyboard)
+        await message.answer("Вот ваши словари:" if STEP_REG == 5 and dicts != [] else "У вас нет словарей", reply_markup=keyboard if STEP_REG == 5 and dicts != [] else None)
     else:
         await message.answer("Вы не зарегистрированы")
 
@@ -232,7 +237,7 @@ async def callback_view_handler(call) -> None:  #view-page:page
             if len(inButtons) >= LINE_IN_PAGE and len(inButtons) + 1 != len(dicts):
                 inButtons[-1] += [InButton(text='--->', callback_data=f'view-page:{page + LINE_IN_PAGE}')]
             keyboard = InMarkup(inline_keyboard=inButtons, resize_keyboard=True)
-        await call.message.edit_text("Вот ваши словари:" if STEP_REG == 5 and dicts != [] else "У вас нет словарей", reply_markup=keyboard)
+        await call.message.edit_text("Вот ваши словари:" if STEP_REG == 5 and dicts != [] else "У вас нет словарей", reply_markup=keyboard if STEP_REG == 5 and dicts != [] else None)
     else:
         await call.message.answer("Вы не зарегистрированы")
 
@@ -316,7 +321,7 @@ async def education_form_step1(message, state) -> None:
     STEP_REG = users_db.get_count_not_empty_in_page(message.chat.id)
     if STEP_REG >= 4:
         data = await state.get_data()
-        if message.text != data['words'][1]:
+        if not compare_data(message.text, data['words'][1]):
             keyboard = InMarkup(inline_keyboard=[
                 [InButton(text="1", callback_data=f"ball:-5"), InButton(text="2", callback_data=f"ball:-4"),
                 InButton(text="3", callback_data=f"ball:-3"), InButton(text="4", callback_data=f"ball:-2"),
