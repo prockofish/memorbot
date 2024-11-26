@@ -86,9 +86,11 @@ async def command_start_handler(message) -> None:
     if STEP_REG == 0:
         users_db.create(message.chat.id)
         await message.answer("Здравствуйте! Это бот для изучения слов.\n\n" \
-                             "Чтобы начать пользоваться его функциями вы должны согласиться " \
-                             "с тем, что результаты использования этого бота будут анонимно " \
-                             "использоваться в моём исследовательском проекте.", reply_markup=inline.agree)
+                             "Чтобы начать пользоваться его функциями\n" \
+                             "вам нужно согласиться с тем, что\n"
+                             "результаты использования вами этого бота\n"
+                             "будут анонимно использоваться в моём\n"
+                             "исследовательском проекте.", reply_markup=inline.agree)
     elif STEP_REG < 4:
         await message.answer("Уже идёт процесс регистрации")
     else:
@@ -131,8 +133,10 @@ async def help_handler(message) -> None:
 
 @disp.message(lambda m: m.text == "Добавить словарь")
 async def dict_add_handler(message) -> None:
-    await message.answer("Скоро функция добавления своих словарей будет реализована.\n" \
-                         "На данный момент, чтобы добавить новый словарь обратитесь к нам по кнопке ниже.", reply_markup=inline.help_button)
+    await message.answer("Скоро функция добавления своих словарей\n"
+                         "будет реализована.\n На данный момент,\n"
+                         "чтобы добавить новый словарь обратитесь\n"
+                         "к нам по кнопке ниже.", reply_markup=inline.help_button)
 
 #
 # Отслеживание callback-ов
@@ -149,12 +153,17 @@ async def callback_agree_handler(call, state) -> None:
 async def callback_gender_handler(call) -> None:
     STEP_REG = users_db.get_count_not_empty_in_page(call.message.chat.id)
     if STEP_REG == 2:
-        users_db.enter( call.message.chat.id, "gender", call.data )
-        await call.message.edit_text( "Выберите принцип обучения (Позже его можно изменить в настройках):\n\n" \
-            "1) Случайность - при обучении будут предлогаться слова в случайном порядке\n\n" \
-            "2) По забываемости - будут предлогаться слова с наихудшим качеством запоминания\n\n" \
-            "3) По времени - будут предлогаться слова, которые были последние в обучении\n\n" \
-            "4) По забываемости и времени - объединение 2 и 3 техники", reply_markup=inline.params )
+        users_db.enter(call.message.chat.id, "gender", call.data)
+        await call.message.edit_text("Выберите принцип обучения (Позже его\n"
+                                    "можно изменить в настройках):\n\n"
+                                    "1) Случайный порядок - будут предлогаться\n"
+                                    "случайные слова\n\n"
+                                    "2) По качеству - будут предлогаться слова,\n"
+                                    "которые вы плохо помните\n\n"
+                                    "3) По времени - будут предлогаться слова,\n"
+                                    "которые были последние в обучении\n\n"
+                                    "4) По забываемости и времени - объединение\n"
+                                    "2 и 3 техники", reply_markup=inline.params)
 
 @disp.callback_query(lambda c: c.data in ['random', 'memoriz', 'time', 'mem-time'])
 async def callback_param_handler(call) -> None:
@@ -163,7 +172,8 @@ async def callback_param_handler(call) -> None:
         users_db.enter(call.message.chat.id, "param", call.data)
         await call.message.delete()
         await call.message.answer("Регистрация окончена!")
-        await call.message.answer("Все функции находяться в меню над клавиатурой", reply_markup=reply.main)
+        await call.message.answer("Все функции находяться в меню над\n" \
+                                  "клавиатурой", reply_markup=reply.main)
     elif STEP_REG >= 4:
         users_db.enter(call.message.chat.id, "param", call.data)
         await call.message.delete()
@@ -196,7 +206,7 @@ async def callback_open_public_handler(call) -> None:  #open-public-dict:dict_id
         inButtons = [[InButton(text='Добавить в личные словари', callback_data=f"add-dict:{select_dict[0]}:{back_page}")], \
                      [InButton(text="Назад", callback_data=f"view-public-page:{back_page}")]]
         keyboard = InMarkup(inline_keyboard=inButtons, resize_keyboard=True)
-        await call.message.edit_text(f"Вы выбрали словарь: \"{select_dict[1]}\"", reply_markup=keyboard)
+        await call.message.edit_text(f"Вы выбрали словарь:\n\"{select_dict[1]}\"", reply_markup=keyboard)
     else:
         await call.message.answer("Вы не зарегистрированы")
 
@@ -250,7 +260,7 @@ async def callback_open_handler(call) -> None:  #open-dict:dict_id:back_page
                      [InButton(text="Удалить", callback_data=f"delete:{dict_id}:{back_page}")], 
                      [InButton(text="Назад", callback_data=f"view-page:{back_page}")]]
         keyboard = InMarkup(inline_keyboard=inButtons, resize_keyboard=True)
-        await call.message.edit_text(f"Вы выбрали словарь: \"{select_dict[1]}\"", reply_markup=keyboard)
+        await call.message.edit_text(f"Вы выбрали словарь:\n\"{select_dict[1]}\"", reply_markup=keyboard)
     else:
         await call.message.answer("Вы не зарегистрированы")
 
@@ -307,17 +317,23 @@ async def callback_help_handler(call) -> None:
 @disp.callback_query(lambda c: c.data == 're_param')
 async def callback_re_param_handler(call) -> None:
     await call.message.delete()
-    await call.message.answer("Выберите принцип обучения:\n\n" \
-            "1) Случайность - при обучении будут предлогаться слова в случайном порядке\n\n" \
-            "2) По забываемости - будут предлогаться слова с наихудшим качеством запоминания\n\n" \
-            "3) По времени - будут предлогаться слова, которые были последние в обучении\n\n" \
-            "4) По забываемости и времени - объединение 2 и 3 техники", reply_markup=inline.params)
+    await call.message.answer("Выберите принцип обучения:\n\n"
+                              "1) Случайный порядок - будут предлогаться\n"
+                              "случайные слова\n\n"
+                              "2) По качеству - будут предлогаться слова,\n"
+                              "которые вы плохо помните\n\n"
+                              "3) По времени - будут предлогаться слова,\n"
+                              "которые были последние в обучении\n\n"
+                              "4) По забываемости и времени - объединение\n"
+                              "2 и 3 техники", reply_markup=inline.params)
     
 @disp.callback_query(lambda c: c.data == 'logout')
 async def callback_re_param_handler(call) -> None:
     users_db.remove(call.message.chat.id)
     await call.message.delete()
-    await call.message.answer("Все ваши данные успешно удалены.\nВы всегда можете восстановить работу бота при помощи команды /start")
+    await call.message.answer("Все ваши данные успешно удалены.\n"
+                              "Вы всегда можете восстановить работу\n"
+                              "бота при помощи команды /start")
     
 #
 # Обработка state-ов
@@ -337,16 +353,22 @@ async def education_form_step1(message, state) -> None:
         data = await state.get_data()
         if not compare_data(message.text, data['words'][1]):
             keyboard = InMarkup(inline_keyboard=[
-                [InButton(text="1", callback_data=f"ball:-5"), InButton(text="2", callback_data=f"ball:-4"),
-                InButton(text="3", callback_data=f"ball:-3"), InButton(text="4", callback_data=f"ball:-2"),
-                InButton(text="5", callback_data=f"ball:-1")]], resize_keyboard=True)
-            await message.answer(f"Не правильно, нужно { data['words'][1] }, { 'потому что ' + data['words'][2] if data['words'][2] != 'None' else '' }\nКак вы оцените, насколько хорошо помните это слово?\n0 - вы совсем не помните слово\n5 - вы отлично его помните, а ошиблись случайно", reply_markup=keyboard)
+                [InButton(text="1", callback_data=f"ball:-4"), InButton(text="2", callback_data=f"ball:-3"),
+                InButton(text="3", callback_data=f"ball:-2"), InButton(text="4", callback_data=f"ball:-1"),
+                InButton(text="5", callback_data=f"ball:0")]], resize_keyboard=True)
+            await message.answer(f"Не правильно. Нужно {data['words'][1]}{', потому что ' + data['words'][2] if data['words'][2] != 'None' else ''}\n"
+                                  "Оцените как вы помните это слово?\n"
+                                  "1 - не помните\n"
+                                  "5 - отлично помните, а ошиблись случайно", reply_markup=keyboard)
         else:
             keyboard = InMarkup(inline_keyboard=[
-                [InButton(text="1", callback_data=f"ball:1"), InButton(text="2", callback_data=f"ball:2"),
-                InButton(text="3", callback_data=f"ball:3"), InButton(text="4", callback_data=f"ball:4"),
-                InButton(text="5", callback_data=f"ball:5")]], resize_keyboard=True)
-            await message.answer(f"Вы правы!\nКак вы оцените, насколько хорошо помните это слово?\n0 - вы совсем не помните слово, выбрали наугад\n5 - вы отлично его помните", reply_markup=keyboard)
+                [InButton(text="1", callback_data=f"ball:0"), InButton(text="2", callback_data=f"ball:1"),
+                InButton(text="3", callback_data=f"ball:2"), InButton(text="4", callback_data=f"ball:3"),
+                InButton(text="5", callback_data=f"ball:4")]], resize_keyboard=True)
+            await message.answer(f"Вы правы!\n"
+                                  "Оцените как вы помните это слово?\n"
+                                  "1 - не помните, выбрали случайно\n"
+                                  "5 - отлично помните", reply_markup=keyboard)
     else:
         await message.answer("Вы не зарегистрированы")
 
